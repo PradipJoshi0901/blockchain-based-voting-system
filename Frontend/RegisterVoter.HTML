@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Voter Registration</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+    }
+
+    body {
+      height: 100vh;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+     
+      background-image: url('./images/Flag-of-Nepal.webp');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center 12%;
+
+     
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(245, 246, 248, 0.85);
+      z-index: 0;
+    }
+
+    .card {
+      position: relative;
+      z-index: 1;
+
+      background: #ffffff;
+      width: 360px;
+      padding: 30px 25px;
+      border-radius: 12px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    }
+
+
+
+    h2 {
+      text-align: center;
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 13px;
+      color: #777;
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-size: 13px;
+      margin-bottom: 5px;
+      display: block;
+      color: #333;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #2563eb;
+    }
+
+    button {
+      width: 100%;
+      padding: 11px;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1e40af;
+    }
+
+    #message {
+      text-align: center;
+      margin-top: 12px;
+      font-size: 13px;
+    }
+
+    .footer-text {
+      text-align: center;
+      font-size: 11px;
+      color: #888;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="card">
+
+    <h2>Voter Registration</h2>
+    <p class="subtitle">Register to exercise your democratic right</p>
+
+    <form id="registerForm">
+
+      <label for="First_Name">First Name</label>
+      <input type="text" id="First_Name" placeholder="Enter your first name" required>
+
+      <label for="Last_Name">Last Name</label>
+      <input type="text" id="Last_Name" placeholder="Enter your last name" required>
+
+      <label for="Date_of_Birth">Date of Birth</label>
+      <input type="date" id="Date_of_Birth" required>
+
+      <label for="citizenship_number">Citizenship Number</label>
+      <input type="text" id="citizenship_number" placeholder="Enter citizenship number" required>
+
+      <label for="NID_number">NID Number</label>
+      <input type="text" id="NID_number" placeholder="Enter NID number" required>
+
+      <button type="submit">Register to Vote</button>
+
+      <p id="message"></p>
+    </form>
+
+    <p class="footer-text">Your information is secure and confidential</p>
+  </div>
+
+<script>
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+   if (!window.ethereum) {
+      document.getElementById('message').innerText = 'MetaMask not detected. Please install MetaMask and try again.';
+      return;
+    }
+
+    let accounts;
+    try {
+      accounts = await window.ethereum.request({
+        method: 'eth_requestAccounts',
+      }); // [web:165][web:197]
+    } catch (err) {
+      document.getElementById('message').innerText = 'Wallet connection rejected.';
+      return;
+    }
+
+    const eth_address = accounts[0];
+
+
+  const data = {
+    First_Name: document.getElementById('First_Name').value,
+    Last_Name: document.getElementById('Last_Name').value,
+    Date_of_Birth: document.getElementById('Date_of_Birth').value,
+    citizenship_number: document.getElementById('citizenship_number').value,
+    NID_number: document.getElementById('NID_number').value,
+  };
+
+  const response = await fetch('/api/registervoter', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+
+  const result = await response.json();
+  document.getElementById('message').innerText = result.message || result.error;
+});
+</script>
+
+</body>
+</html>

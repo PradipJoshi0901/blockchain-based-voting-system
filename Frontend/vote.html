@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Election Voting Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+            background: #fff;
+            border: 1px solid #ccc;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .header h2 { margin: 0; }
+        .timer {
+            border: 1px solid #ccc;
+            padding: 10px 20px;
+            font-size: 13px;
+            word-break: break-all;
+            max-width: 300px;
+            text-align: right;
+        }
+
+        .main { display: flex; gap: 20px; }
+
+        .vote-section {
+            flex: 2;
+            border: 1px solid #ccc;
+            padding: 15px;
+        }
+
+        .candidate {
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #f0f4ff, #ffffff);
+            border-left: 6px solid #4a90e2;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .candidate:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+            background: linear-gradient(135deg, #ffffff, #e6ecff);
+        }
+
+        .candidate label {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+        }
+
+        .candidate input {
+            transform: scale(1.2);
+            margin-bottom: 8px;
+        }
+
+        .candidate h4 {
+            margin: 0;
+            color: #2c3e50;
+        }
+
+        .candidate p {
+            margin: 2px 0;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .candidate input:checked ~ h4,
+        .candidate input:checked ~ p {
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        .candidate::after {
+            content: "🗳️ Vote";
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: #4a90e2;
+            color: white;
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .cast-btn {
+            display: block;
+            margin: 20px auto 0;
+            padding: 10px 30px;
+            background: #444;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 15px;
+        }
+
+        .cast-btn:hover { background: #222; }
+        .cast-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+        .side-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .box { border: 1px solid #ccc; padding: 15px; }
+        .box h3 { margin-top: 0; }
+
+        /* Results styling */
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+
+        .result-row:last-child { border-bottom: none; }
+
+        .result-name { font-weight: 500; color: #2c3e50; }
+
+        .result-count {
+            background: #4a90e2;
+            color: white;
+            border-radius: 12px;
+            padding: 2px 10px;
+            font-size: 13px;
+            font-weight: bold;
+            min-width: 28px;
+            text-align: center;
+        }
+
+        .result-bar-wrap {
+            width: 100%;
+            background: #eee;
+            border-radius: 4px;
+            height: 6px;
+            margin-top: 4px;
+        }
+
+        .result-bar {
+            height: 6px;
+            background: linear-gradient(90deg, #4a90e2, #7bb3f0);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .result-item { padding: 8px 0; border-bottom: 1px solid #eee; }
+        .result-item:last-child { border-bottom: none; }
+
+        .total-votes {
+            margin-top: 10px;
+            font-weight: bold;
+            border-top: 2px solid #eee;
+            padding-top: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .loading { text-align: center; color: #666; font-style: italic; }
+
+        .status {
+            font-size: 12px;
+            color: #555;
+            margin-top: 10px;
+            min-height: 18px;
+            text-align: center;
+        }
+
+        .status.success { color: #27ae60; font-weight: bold; }
+        .status.error   { color: #e74c3c; }
+        .status.pending { color: #e67e22; }
+
+        #alreadyVotedMsg {
+            display: none;
+            color: #e67e22;
+            font-size: 13px;
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <div>
+            <h2>Election</h2>
+            <p>Cast your vote to choose your representative</p>
+        </div>
+        <div class="timer" id="status">Connect MetaMask...</div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main">
+        <!-- Voting Section -->
+        <div class="vote-section">
+            <h3>Select Your Candidate</h3>
+            <div id="candidatesList" class="loading">Loading candidates from database...</div>
+            <button class="cast-btn" id="castVoteBtn" disabled>Cast Vote</button>
+            <div id="alreadyVotedMsg">⚠️ You have already voted with this wallet address.</div>
+            <div class="status" id="voteStatus"></div>
+        </div>
+
+        <!-- Side Panel -->
+        <div class="side-panel">
+            <div class="box">
+                <h3>Live Results</h3>
+                <div id="resultsList"><div class="loading">Loading live results...</div></div>
+            </div>
+
+            <div class="box">
+                <h3>Election Info</h3>
+                <p>Election Date: On-chain</p>
+                <p>Election Time: Live</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Web3.js v4 -->
+<script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+<script>
+    const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+    const CONTRACT_ABI = [
+        {
+            "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+            "name": "candidates",
+            "outputs": [
+                { "internalType": "uint256", "name": "id", "type": "uint256" },
+                { "internalType": "string",  "name": "name", "type": "string" },
+                { "internalType": "uint256", "name": "voteCount", "type": "uint256" }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [{ "internalType": "address", "name": "voter", "type": "address" }],
+            "name": "checkVote",
+            "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "countCandidates",
+            "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "getAllCandidates",
+            "outputs": [
+                { "internalType": "uint256[]", "name": "", "type": "uint256[]" },
+                { "internalType": "string[]",  "name": "", "type": "string[]" },
+                { "internalType": "uint256[]", "name": "", "type": "uint256[]" }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [{ "internalType": "uint256", "name": "candidateID", "type": "uint256" }],
+            "name": "getCandidate",
+            "outputs": [
+                { "internalType": "uint256", "name": "", "type": "uint256" },
+                { "internalType": "string",  "name": "", "type": "string" },
+                { "internalType": "uint256", "name": "", "type": "uint256" }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "getCountCandidates",
+            "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+            "name": "hasVoted",
+            "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            /* vote(string name) — the ONLY write function in your contract */
+            "inputs": [{ "internalType": "string", "name": "name", "type": "string" }],
+            "name": "vote",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        }
+    ];
+
+    let web3, contract, userAccount;
+
+    // ─── INIT ────────────────────────────────────────────────────────────────
+    async function initWeb3() {
+        if (!window.ethereum) {
+            document.getElementById('status').textContent = '❌ Install MetaMask';
+            return;
+        }
+        try {
+            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            userAccount = accounts[0];
+
+            web3     = new Web3(window.ethereum);
+            contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
+
+            document.getElementById('status').textContent =
+                `✅ ${userAccount.slice(0,6)}...${userAccount.slice(-4)}`;
+
+            await loadCandidates();
+            await loadResults();
+            await checkIfAlreadyVoted();
+
+        } catch (err) {
+            document.getElementById('status').textContent = '❌ Connection failed';
+            console.error(err);
+        }
+    }
+
+    // ─── LOAD CANDIDATES FROM DATABASE ───────────────────────────────────────
+    async function loadCandidates() {
+        const candidatesList = document.getElementById('candidatesList');
+        candidatesList.innerHTML = '<div class="loading">Loading...</div>';
+
+        try {
+            const res  = await fetch('/api/listcandidates');
+            const data = await res.json();
+
+            candidatesList.innerHTML = '';
+
+            data.forEach(c => {
+                const div = document.createElement('div');
+                div.className = 'candidate';
+                div.innerHTML = `
+                    <label>
+                        <input type="radio" name="candidate" value="${c.Candidate_Name}">
+                        <h4><strong>Name:</strong> ${c.Candidate_Name}</h4>
+                        <p><strong>Party:</strong> ${c.Party_Name}</p>
+                        <p><strong>Age:</strong> ${c.Age}</p>
+                        <p><strong>Gender:</strong> ${c.Gender}</p>
+                    </label>`;
+                candidatesList.appendChild(div);
+            });
+
+            document.getElementById('castVoteBtn').disabled = false;
+
+        } catch (err) {
+            console.error(err);
+            candidatesList.innerHTML = '<div class="loading">❌ Error loading candidates</div>';
+        }
+    }
+
+    // ─── LOAD LIVE RESULTS FROM BLOCKCHAIN ───────────────────────────────────
+    async function loadResults() {
+        const resultsList = document.getElementById('resultsList');
+
+        if (!contract) {
+            resultsList.innerHTML = '<div class="loading">Connect MetaMask to see results</div>';
+            return;
+        }
+
+        try {
+            // First check count — if 0, no votes cast yet, skip getAllCandidates()
+            const count = await contract.methods.getCountCandidates().call();
+
+            if (Number(count) === 0) {
+                resultsList.innerHTML = '<div class="loading">No votes cast yet</div>';
+                return;
+            }
+
+            const result = await contract.methods.getAllCandidates().call();
+            const names  = result[1];
+            const votes  = result[2];
+
+            const totalVotes = votes.reduce((sum, v) => sum + Number(v), 0);
+            resultsList.innerHTML = '';
+
+            names.forEach((name, i) => {
+                const voteCount = Number(votes[i]);
+                const pct = totalVotes > 0 ? Math.round((voteCount / totalVotes) * 100) : 0;
+
+                const item = document.createElement('div');
+                item.className = 'result-item';
+                item.innerHTML = `
+                    <div class="result-row">
+                        <span class="result-name">${name}</span>
+                        <span class="result-count">${voteCount}</span>
+                    </div>
+                    <div class="result-bar-wrap">
+                        <div class="result-bar" style="width: ${pct}%"></div>
+                    </div>`;
+                resultsList.appendChild(item);
+            });
+
+            const total = document.createElement('div');
+            total.className = 'total-votes';
+            total.innerHTML = `<span>Total Votes</span><span>${totalVotes}</span>`;
+            resultsList.appendChild(total);
+
+        } catch (err) {
+            console.error('Error loading results:', err);
+            resultsList.innerHTML = '<div class="loading">No votes cast yet</div>';
+        }
+    }
+
+    // ─── CHECK IF THIS WALLET HAS ALREADY VOTED ──────────────────────────────
+    async function checkIfAlreadyVoted() {
+        if (!contract || !userAccount) return;
+        try {
+            const voted = await contract.methods.hasVoted(userAccount).call();
+            if (voted) {
+                document.getElementById('castVoteBtn').disabled = true;
+                document.getElementById('alreadyVotedMsg').style.display = 'block';
+            }
+        } catch (err) {
+            console.error('Error checking vote status:', err);
+        }
+    }
+
+    // ─── CAST VOTE ────────────────────────────────────────────────────────────
+    document.getElementById('castVoteBtn').addEventListener('click', async () => {
+        const selected = document.querySelector('input[name="candidate"]:checked');
+        if (!selected) {
+            alert('Please select a candidate');
+            return;
+        }
+
+        const candidateName = selected.value;
+        const statusEl      = document.getElementById('voteStatus');
+
+        statusEl.className   = 'status pending';
+        statusEl.textContent = '⏳ Sending transaction...';
+        document.getElementById('castVoteBtn').disabled = true;
+
+        try {
+            // Estimate gas — Web3 v4 returns BigInt, convert to Number
+            let gasEstimate;
+            try {
+                const rawGas = await contract.methods.vote(candidateName).estimateGas({ from: userAccount });
+                gasEstimate  = Math.ceil(Number(rawGas) * 1.2);
+                console.log('Gas estimate:', gasEstimate);
+            } catch (gasErr) {
+                const msg = (gasErr.message || '').toLowerCase();
+                if (msg.includes('already voted')) {
+                    statusEl.className   = 'status error';
+                    statusEl.textContent = '❌ You have already voted with this wallet.';
+                    document.getElementById('alreadyVotedMsg').style.display = 'block';
+                    document.getElementById('castVoteBtn').disabled = true;
+                    return;
+                }
+                gasEstimate = 150000;
+            }
+
+            const tx = await contract.methods.vote(candidateName).send({
+                from: userAccount,
+                gas:  gasEstimate
+            });
+
+            statusEl.className   = 'status success';
+            statusEl.textContent = `✅ Vote cast! Tx: ${tx.transactionHash.slice(0, 12)}...`;
+
+            document.getElementById('alreadyVotedMsg').style.display = 'block';
+            await loadResults();
+
+        } catch (err) {
+            statusEl.className = 'status error';
+            const msg = (err.message || '').toLowerCase();
+            if (msg.includes('already voted')) {
+                statusEl.textContent = '❌ You have already voted with this wallet.';
+                document.getElementById('alreadyVotedMsg').style.display = 'block';
+                document.getElementById('castVoteBtn').disabled = true;
+            } else if (msg.includes('user rejected') || msg.includes('denied')) {
+                statusEl.textContent = '❌ Transaction rejected in MetaMask.';
+                document.getElementById('castVoteBtn').disabled = false;
+            } else {
+                statusEl.textContent = `❌ Error: ${err.message}`;
+                document.getElementById('castVoteBtn').disabled = false;
+            }
+            console.error(err);
+        }
+    });
+
+    // ─── START ────────────────────────────────────────────────────────────────
+    window.addEventListener('load', initWeb3);
+
+    // Auto-refresh results every 15 seconds
+    setInterval(loadResults, 15000);
+</script>
+</body>
+</html>

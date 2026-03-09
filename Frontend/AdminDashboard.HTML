@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Management Panel</title>
+
+<style>
+* {
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #f4f6fb;
+}
+
+
+.topbar {
+  background: #ffffff;
+  height: 60px;
+  padding: 0 25px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  width: 34px;
+  height: 34px;
+  background: #4f6bd8;
+  color: #ffffff;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  margin-right: 10px;
+}
+
+.topbar-title h4 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.subtitle {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+
+.main {
+  padding: 40px;
+  text-align: center;
+}
+
+.main h2 {
+  margin-bottom: 5px;
+}
+
+.main p {
+  color: #6b7280;
+  font-size: 14px;
+  margin-bottom: 40px;
+}
+
+
+.cards {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.card {
+  width: 300px;
+  border-radius: 14px;
+  padding: 25px;
+  color: #ffffff;
+  text-align: left;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+  cursor: pointer;
+}
+
+.card h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
+}
+
+.card p {
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  font-size: 12px;
+}
+
+.access-btn {
+  background: rgba(255,255,255,0.25);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+}
+
+
+.candidate-card {
+  background: linear-gradient(135deg, #6fbf8b, #4e9f6a);
+}
+
+.citizen-card {
+  background: linear-gradient(135deg, #f0a36a, #d9824a);
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo">A</div>
+    <div class="topbar-title">
+      <h4>Admin Panel</h4>
+      <div class="subtitle">Management Dashboard</div>
+    </div>
+  </div>
+
+</div>
+
+
+<div class="main">
+  <h2>Management Dashboard</h2>
+  <p>Select a management option to continue</p>
+
+  <div class="cards">
+
+    
+    <div class="card candidate-card"
+         onclick="location.href='CandidateManagement.HTML'">
+      <h3>Candidate Management</h3>
+      <p>Manage candidate registrations and profiles</p>
+
+      <div class="card-footer">
+        <span>View | Add | Remove</span>
+        <span class="access-btn">Access</span>
+      </div>
+    </div>
+
+   
+    <div class="card citizen-card"
+         onclick="location.href='CitizenCorrection.HTML'">
+      <h3>Citizen Management</h3>
+      <p>Manage citizen records and corrections</p>
+
+      <div class="card-footer">
+        <span>View | Update</span>
+        <span class="access-btn">Access</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Online Voting System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: "Segoe UI", Tahoma, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            background: #f5f6f8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card {
+            background: #ffffff;
+            width: 320px;
+            padding: 30px 25px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .icon-box {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 15px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: #333;
+        }
+
+        h2 {
+            margin: 10px 0 5px;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: #777;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+        }
+
+       
+        .vote {
+            background: #222;
+            color: #fff;
+        }
+
+        .vote:hover {
+            background: #000;
+        }
+
+        .admin,
+        .register {
+            background: #fff;
+            color: #222;
+            border: 1px solid #ccc;
+        }
+
+        .admin:hover,
+        .register:hover {
+            background: #f3f3f3;
+        }
+
+        .footer-text {
+            margin-top: 15px;
+            font-size: 11px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div class="icon-box">
+            <i class="fas fa-check-square"></i>
+        </div>
+
+        <h2>Online Voting System</h2>
+        <p class="subtitle">Select an option to continue</p>
+
+      
+        <button class="btn vote" onclick="location.href='vote.html'">
+            Vote
+        </button>
+
+        
+        <button class="btn admin" onclick="location.href='AdminDashboard.html'">
+            Admin Login
+        </button>
+
+       
+        <button class="btn register" onclick="location.href='RegisterVoter.html'">
+            Register as Voter
+        </button>
+
+        <p class="footer-text">Secure & Transparent Voting Platform</p>
+    </div>
+
+</body>
+</html>
