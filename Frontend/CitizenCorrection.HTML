@@ -3,170 +3,341 @@
 <head>
 <meta charset="UTF-8">
 <title>Citizen Management Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
 <style>
-* {
-  box-sizing: border-box;
-  font-family: "Segoe UI", Tahoma, sans-serif;
+:root {
+  --bg: #f4f1ec;
+  --bg2: #ede9e2;
+  --surface: #ffffff;
+  --surface2: #f9f7f4;
+  --border: #ddd9d0;
+  --border-focus: #2d5be3;
+  --accent: #2d5be3;
+  --accent-light: #eef2fd;
+  --accent-glow: rgba(45, 91, 227, 0.15);
+  --text: #1a1a2e;
+  --text-muted: #8a8578;
+  --text-dim: #b5b0a8;
+  --success: #0f7b5a;
+  --success-bg: #edfbf5;
+  --error: #c0392b;
+  --error-bg: #fef2f2;
+  --info-bg: #eef2fd;
+  --mono: 'JetBrains Mono', monospace;
+  --display: 'Playfair Display', serif;
+  --body: 'Outfit', sans-serif;
 }
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  margin: 0;
-  height: 100vh;
-  background: #eef3ff;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  min-height: 100vh;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
 }
 
-.portal {
-  background: #fff;
-  width: 420px;
-  border-radius: 14px;
-  box-shadow: 0 18px 40px rgba(0,0,0,0.12);
-  overflow: hidden;
+.portal-wrapper {
+  width: 100%;
+  max-width: 540px;
+  animation: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .header {
-  background: linear-gradient(135deg, #3b5bfd, #4f46e5);
-  color: #fff;
-  padding: 18px;
-  text-align: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px 18px 0 0;
+  padding: 28px 32px 24px;
+  border-bottom: 3px solid var(--accent);
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
 }
 
-.header h2 {
-  margin: 0;
-  font-size: 20px;
+.header-seal {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+  background: var(--accent-light);
+}
+
+.header-eyebrow {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 5px;
+}
+
+.header h1 {
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.15;
 }
 
 .header p {
-  margin: 4px 0 0;
-  font-size: 12px;
-  opacity: 0.9;
+  margin-top: 4px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  font-weight: 300;
 }
 
-
-.section {
-  padding: 18px;
-  border-bottom: 1px solid #eee;
+.portal-body {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 18px 18px;
+  overflow: hidden;
 }
 
-.section:last-child {
-  border-bottom: none;
+.section { padding: 24px 32px; }
+.section + .section { border-top: 1px solid var(--border); }
+
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
 }
 
-.section-title {
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 12px;
-  color: #333;
+.section-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
+.section-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.section-desc  { font-size: 11px; color: var(--text-muted); margin-left: auto; font-family: var(--mono); }
+
+.field { margin-bottom: 14px; }
+
+.field label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
 
 input {
   width: 100%;
-  padding: 10px;
-  margin-bottom: 12px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 14px;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 13.5px;
+  padding: 10px 13px;
+  transition: all 0.2s ease;
 }
+
+input::placeholder { color: var(--text-dim); }
 
 input:focus {
   outline: none;
-  border-color: #4f46e5;
+  border-color: var(--accent);
+  background: #fff;
+  box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
+input[type="date"] { font-family: var(--mono); font-size: 12px; }
+input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.4; cursor: pointer; }
 
-.row {
-  display: flex;
-  gap: 10px;
-}
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-.row input {
-  flex: 1;
-}
-
-
-button {
+.btn {
   width: 100%;
-  padding: 11px;
+  padding: 12px;
   border: none;
-  border-radius: 8px;
-  color: #fff;
-  font-size: 14px;
+  border-radius: 10px;
+  font-family: var(--body);
+  font-size: 13.5px;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 4px;
 }
 
-.search-btn {
-  background: #2563eb;
+.btn:active { transform: scale(0.98); }
+
+.btn-search {
+  background: var(--accent-light);
+  color: var(--accent);
+  border: 1.5px solid rgba(45,91,227,0.25);
 }
 
-.search-btn:hover {
-  background: #1e40af;
+.btn-search:hover { background: #e0e8fb; border-color: var(--accent); }
+
+.btn-update {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(45,91,227,0.3);
 }
 
-.update-btn {
-  background: #22c55e;
+.btn-update:hover {
+  background: #2450cc;
+  box-shadow: 0 6px 20px rgba(45,91,227,0.4);
+  transform: translateY(-1px);
 }
 
-.update-btn:hover {
-  background: #16a34a;
-}
+.divider { height: 1px; background: var(--border); margin: 20px 0; }
 
 #message {
+  display: none;
+  margin-top: 14px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  padding: 10px 14px;
+  border-radius: 8px;
   text-align: center;
-  font-size: 13px;
-  margin-top: 10px;
+  animation: fadeIn 0.3s ease;
 }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+#message.success { display: block; background: var(--success-bg); border: 1px solid rgba(15,123,90,0.25); color: var(--success); }
+#message.error   { display: block; background: var(--error-bg);   border: 1px solid rgba(192,57,43,0.25); color: var(--error); }
+#message.info    { display: block; background: var(--info-bg);    border: 1px solid rgba(45,91,227,0.2); color: var(--accent); }
+
+.footer-strip {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.footer-strip span { font-family: var(--mono); font-size: 9px; color: var(--text-dim); letter-spacing: 0.12em; text-transform: uppercase; }
+.footer-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--text-dim); }
 </style>
 </head>
 
 <body>
+<div class="portal-wrapper">
 
-<div class="portal">
-
- 
   <div class="header">
-    <h2>Citizen Management Form</h2>
-    <p>Search and Update Citizen Information</p>
+    <div class="header-seal">🏛</div>
+    <div>
+      <div class="header-eyebrow">Official Registry · Secure Access</div>
+      <h1>Citizen Management<br>Portal</h1>
+      <p>Search and update registered citizen records</p>
+    </div>
   </div>
 
- 
-  <div class="section">
-    <div class="section-title">🔍 Search Citizen</div>
+  <div class="portal-body">
 
-    <input type="text" id="searchCitizenship" placeholder="Enter citizenship number" required>
-    <input type="text" id="searchNID" placeholder="Enter NID number" required>
+    <div class="section">
+      <div class="section-label">
+        <div class="section-num">01</div>
+        <div class="section-title">Lookup Citizen Record</div>
+        <div class="section-desc">Required fields</div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>Citizenship No.</label>
+          <input type="text" id="searchCitizenship" placeholder="e.g. 12-34-56789">
+        </div>
+        <div class="field">
+          <label>NID Number</label>
+          <input type="text" id="searchNID" placeholder="e.g. NID-00001">
+        </div>
+      </div>
+      <button class="btn btn-search" onclick="searchCitizen()">Search Citizen</button>
+    </div>
 
-    <button class="search-btn" onclick="searchCitizen()">Search Citizen</button>
+    <div class="section">
+      <div class="section-label">
+        <div class="section-num">02</div>
+        <div class="section-title">Citizen Information</div>
+        <div class="section-desc">Editable fields</div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>First Name</label>
+          <input type="text" id="First_Name" placeholder="First name">
+        </div>
+        <div class="field">
+          <label>Last Name</label>
+          <input type="text" id="Last_Name" placeholder="Last name">
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>Date of Birth</label>
+          <input type="date" id="date_of_birth">
+        </div>
+        <div class="field">
+          <label>Gender</label>
+          <input type="text" id="Gender" placeholder="Gender">
+        </div>
+      </div>
+      <div class="field">
+        <label>Full Address</label>
+        <input type="text" id="address" placeholder="Street, City, Province">
+      </div>
+      <div class="field">
+        <label>NID Number</label>
+        <input type="text" id="NID_number" placeholder="NID number">
+      </div>
+      <div class="divider"></div>
+      <button class="btn btn-update" onclick="updateCitizen()">Update Citizen Information</button>
+      <div id="message"></div>
+    </div>
+
   </div>
 
- 
-  <div class="section">
-    <div class="section-title">✏️ Citizen Information</div>
-
-    <div class="row">
-      <input type="text" id="First_Name" placeholder="First name">
-      <input type="text" id="Last_Name" placeholder="Last name">
-    </div>
-
-    <div class="row">
-      <input type="date" id="date_of_birth">
-      <input type="text" id="Gender" placeholder="Gender">
-    </div>
-
-    <input type="text" id="address" placeholder="Enter full address">
-    <input type="text" id="NID_number" placeholder="NID number">
-
-    <button class="update-btn" onclick="updateCitizen()">Update Citizen Information</button>
-
-    <p id="message"></p>
+  <div class="footer-strip">
+    <span>Civil Registry System</span>
+    <div class="footer-dot"></div>
+    <span>Authorized Use Only</span>
+    <div class="footer-dot"></div>
+    <span>v2.0</span>
   </div>
 
 </div>
 
 <script>
+function showMessage(text, type = 'info') {
+  const el = document.getElementById('message');
+  el.textContent = text;
+  el.className = type;
+  el.style.animation = 'none';
+  el.offsetHeight;
+  el.style.animation = '';
+}
+
 async function searchCitizen() {
   const citizenship_number = document.getElementById('searchCitizenship').value;
   const NID_number = document.getElementById('searchNID').value;
@@ -179,7 +350,7 @@ async function searchCitizen() {
   const result = await response.json();
 
   if (!response.ok) {
-    document.getElementById('message').innerText = result.error || 'Citizen not found';
+    showMessage(result.error || 'Citizen not found', 'error');
     return;
   }
 
@@ -192,26 +363,32 @@ async function searchCitizen() {
   document.getElementById('address').value       = result.address || '';
   document.getElementById('NID_number').value    = result.NID_number || '';
 
-  document.getElementById('searchCitizenship').dataset.originalCitizenship = result.citizenship_number;
-  document.getElementById('searchNID').dataset.originalNID = result.original_NID_number;
+  document.getElementById('searchCitizenship').dataset.originalCitizenship = result.citizenship_number || citizenship_number;
+  document.getElementById('searchNID').dataset.originalNID = result.NID_number || NID_number;
 
-  document.getElementById('message').innerText =
-    'Citizen data loaded. You can edit and update.';
+  showMessage('Citizen data loaded. You can edit and update.', 'info');
 }
 
 async function updateCitizen() {
   const searchCitizenshipInput = document.getElementById('searchCitizenship');
   const searchNIDInput = document.getElementById('searchNID');
 
+  const citizenshipNum = searchCitizenshipInput.dataset.originalCitizenship || searchCitizenshipInput.value.trim();
+  const nidNum = searchNIDInput.dataset.originalNID || searchNIDInput.value.trim();
+
+  if (!citizenshipNum || !nidNum) {
+    showMessage('Please search for a citizen first before updating.', 'error');
+    return;
+  }
+
   const data = {
-    citizenship_number: searchCitizenshipInput.dataset.originalCitizenship || searchCitizenshipInput.value,
-    original_NID_number: searchNIDInput.dataset.originalNID || searchNIDInput.value,
+    citizenship_number: citizenshipNum,
+    NID_number: nidNum,
     First_Name: document.getElementById('First_Name').value,
     Last_Name: document.getElementById('Last_Name').value,
     date_of_birth: document.getElementById('date_of_birth').value,
     Gender: document.getElementById('Gender').value,
-    address: document.getElementById('address').value,
-    new_NID_number: document.getElementById('NID_number').value
+    address: document.getElementById('address').value
   };
 
   const response = await fetch('/api/updatecitizen', {
@@ -221,9 +398,8 @@ async function updateCitizen() {
   });
 
   const result = await response.json();
-  document.getElementById('message').innerText = result.message || result.error;
+  showMessage(result.message || result.error, response.ok ? 'success' : 'error');
 }
 </script>
-
 </body>
 </html>
