@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Voter Login</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; font-family: "Segoe UI", Tahoma, sans-serif; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #f5f6f8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card {
+      background: #ffffff;
+      width: 400px;
+      padding: 35px 30px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+      text-align: center;
+    }
+
+    .icon-box {
+      width: 60px;
+      height: 60px;
+      margin: 0 auto 15px;
+      background: #f0f4ff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      color: #2563eb;
+    }
+
+    h2 { margin: 10px 0 5px; font-size: 22px; font-weight: 600; color: #1a1a2e; }
+    .subtitle { font-size: 13px; color: #777; margin-bottom: 25px; }
+
+    input {
+      width: 100%;
+      padding: 11px 14px;
+      margin-bottom: 15px;
+      border-radius: 7px;
+      border: 1px solid #ddd;
+      font-size: 14px;
+      text-align: left;
+    }
+
+    input:focus { outline: none; border-color: #2563eb; }
+
+    video {
+      width: 100%;
+      border-radius: 10px;
+      border: 3px solid #2563eb;
+      background: #000;
+      display: none;
+      margin-bottom: 15px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 11px;
+      border: none;
+      border-radius: 7px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 10px;
+      transition: background 0.2s;
+    }
+
+    .btn-primary { background: #2563eb; color: #fff; }
+    .btn-primary:hover { background: #1e40af; }
+    .btn-primary:disabled { background: #93c5fd; cursor: not-allowed; }
+
+    .btn-secondary { background: #fff; color: #333; border: 1px solid #ccc; }
+    .btn-secondary:hover { background: #f3f3f3; }
+
+    #status {
+      min-height: 22px;
+      font-size: 13px;
+      font-weight: 600;
+      margin: 10px 0;
+      padding: 8px;
+      border-radius: 6px;
+    }
+
+    .status-pending  { color: #e67e22; background: #fef9f0; }
+    .status-success  { color: #27ae60; background: #f0faf4; }
+    .status-error    { color: #e74c3c; background: #fff5f5; }
+
+    /* Welcome overlay */
+    #welcomeOverlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #welcomeOverlay.show { display: flex; }
+
+    .welcome-box {
+      background: #fff;
+      padding: 40px 35px;
+      border-radius: 14px;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+      animation: popIn 0.3s ease;
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
+
+    .welcome-icon {
+      font-size: 50px;
+      margin-bottom: 15px;
+    }
+
+    .welcome-box h2 { color: #27ae60; margin: 0 0 8px; font-size: 24px; }
+    .welcome-box p  { color: #555; font-size: 14px; margin: 0 0 20px; }
+
+    .btn-vote {
+      padding: 12px 35px;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-vote:hover { background: #1e40af; }
+
+    .footer-text { margin-top: 15px; font-size: 11px; color: #888; }
+
+    .steps {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 11px;
+      color: #aaa;
+      gap: 4px;
+    }
+
+    .step-circle {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #eee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+      color: #aaa;
+    }
+
+    .step.active .step-circle { background: #2563eb; color: #fff; }
+    .step.done   .step-circle { background: #27ae60; color: #fff; }
+    .step.active span         { color: #2563eb; font-weight: 600; }
+    .step.done   span         { color: #27ae60; }
+
+    .step-line {
+      width: 30px;
+      height: 2px;
+      background: #eee;
+      margin-top: 14px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="icon-box">
+    <i class="fas fa-fingerprint"></i>
+  </div>
+
+  <h2>Voter Login</h2>
+  <p class="subtitle">Verify your identity to access the voting page</p>
+
+  <!-- Steps indicator -->
+  <div class="steps">
+    <div class="step active" id="step1">
+      <div class="step-circle">1</div>
+      <span>Citizen ID</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step" id="step2">
+      <div class="step-circle">2</div>
+      <span>Face Scan</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step" id="step3">
+      <div class="step-circle">3</div>
+      <span>Vote</span>
+    </div>
+  </div>
+
+  <!-- Step 1: Enter citizenship number -->
+  <div id="inputSection">
+    <input type="text" id="citizenshipNo" placeholder="Enter Citizenship Number (e.g. CIT123456)">
+    <button class="btn btn-primary" onclick="startFaceScan()">
+      <i class="fas fa-camera"></i> Start Face Verification
+    </button>
+  </div>
+
+  <!-- Step 2: Camera -->
+  <video id="video" autoplay muted playsinline></video>
+
+  <div id="status"></div>
+
+  <button class="btn btn-secondary" onclick="location.href='vote.html'">
+    <i class="fas fa-arrow-left"></i> Back to Home
+  </button>
+
+  <p class="footer-text">Your face data is never stored during login</p>
+</div>
+
+<!-- Welcome Overlay -->
+<div id="welcomeOverlay">
+  <div class="welcome-box">
+    <div class="welcome-icon">🎉</div>
+    <h2>Welcome!</h2>
+    <p id="welcomeMsg">Identity verified successfully.<br>You may now cast your vote.</p>
+    <button class="btn-vote" onclick="goToVote()">
+      <i class="fas fa-vote-yea"></i> Proceed to Vote
+    </button>
+  </div>
+</div>
+
+<script>
+  // Dynamically load face-api
+  const script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js';
+  script.onload  = () => console.log('✅ face-api loaded');
+  script.onerror = () => setStatus('❌ Failed to load face-api.js', 'error');
+  document.head.appendChild(script);
+
+  let verifiedCitizenshipNo = null;
+
+  function setStatus(msg, type = '') {
+    const el = document.getElementById('status');
+    el.textContent = msg;
+    el.className = type ? `status-${type}` : '';
+  }
+
+  function setStep(active) {
+    ['step1','step2','step3'].forEach((id, i) => {
+      const el = document.getElementById(id);
+      el.className = 'step';
+      if (i + 1 < active)  el.classList.add('done');
+      if (i + 1 === active) el.classList.add('active');
+    });
+  }
+
+  async function startFaceScan() {
+    const citizenshipNo = document.getElementById('citizenshipNo').value.trim();
+
+    if (!citizenshipNo) {
+      setStatus('⚠️ Please enter your citizenship number', 'error');
+      return;
+    }
+
+    if (typeof faceapi === 'undefined') {
+      setStatus('⏳ face-api.js still loading, please wait...', 'pending');
+      return;
+    }
+
+    setStep(2);
+    setStatus('⏳ Loading face models...', 'pending');
+    document.getElementById('inputSection').style.display = 'none';
+
+    try {
+      await faceapi.nets.tinyFaceDetector.loadFromUri('./models');
+      await faceapi.nets.faceLandmark68Net.loadFromUri('./models');
+      await faceapi.nets.faceRecognitionNet.loadFromUri('./models');
+
+      setStatus('📷 Opening camera...', 'pending');
+
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const video  = document.getElementById('video');
+      video.srcObject = stream;
+      video.style.display = 'block';
+      await video.play();
+
+      await new Promise(r => setTimeout(r, 3000));
+      setStatus('🔍 Scanning face...', 'pending');
+
+      const detection = await faceapi
+        .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+        .withFaceLandmarks()
+        .withFaceDescriptor();
+
+      stream.getTracks().forEach(t => t.stop());
+      video.style.display = 'none';
+
+      if (!detection) {
+        setStatus('❌ No face detected. Please try again.', 'error');
+        resetForm();
+        return;
+      }
+
+      setStatus('✅ Face detected! Verifying...', 'pending');
+
+      const descriptor = Array.from(detection.descriptor);
+
+      // Send to backend for verification
+      const res  = await fetch('/api/verify-face', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ citizenshipNo, descriptor })
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        setStatus('❌ ' + data.error, 'error');
+        resetForm();
+        return;
+      }
+
+      // ✅ Verified!
+      verifiedCitizenshipNo = citizenshipNo;
+      setStep(3);
+      setStatus('✅ Verified successfully!', 'success');
+      showWelcome(citizenshipNo);
+
+    } catch (err) {
+      console.error(err);
+      setStatus('❌ Error: ' + err.message, 'error');
+      resetForm();
+    }
+  }
+
+  function showWelcome(citizenshipNo) {
+    document.getElementById('welcomeMsg').innerHTML =
+      `Identity verified for <strong>${citizenshipNo}</strong>.<br>You may now cast your vote.`;
+    document.getElementById('welcomeOverlay').classList.add('show');
+  }
+
+  function goToVote() {
+    // Pass citizenship number to vote page via sessionStorage
+    sessionStorage.setItem('verifiedVoter', verifiedCitizenshipNo);
+    window.location.href = 'vote.html';
+  }
+
+  function resetForm() {
+    setStep(1);
+    document.getElementById('inputSection').style.display = 'block';
+    document.getElementById('video').style.display = 'none';
+  }
+</script>
+
+</body>
+</html>
