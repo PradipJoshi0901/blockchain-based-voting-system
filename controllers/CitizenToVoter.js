@@ -43,10 +43,13 @@ export const registervoter = async (req, res) => {
 
     const voter_id = generateVoterId();
 
-    await voter_database.execute(
-      `INSERT INTO voters (voter_id, First_Name, Last_Name, date_of_birth, citizenship_number, NID_number) VALUES (?, ?, ?, ?, ?, ?)`,
-      [voter_id, First_Name, Last_Name, Date_of_Birth, citizenship_number, NID_number]
-    );
+  await voter_database.execute(
+  `INSERT INTO voters 
+   (voter_id, First_name, Last_name, date_of_birth, citizenship_number, NID_number, biometric_hash) 
+   VALUES (?, ?, ?, ?, ?, ?, ?)`,
+  [voter_id, First_Name, Last_Name, Date_of_Birth, citizenship_number, NID_number, citizen.biometric_hash]
+);
+
 
     await citizen_database.execute(
       'UPDATE citizen SET is_registered = ? WHERE citizenship_number = ? AND NID_number = ?',
