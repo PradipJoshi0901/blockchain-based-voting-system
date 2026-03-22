@@ -10,7 +10,7 @@ import {
   findCitizenByCitizenship,
   updateCitizen
 } from '../controllers/CitizenControl.js';
-import { registerFace, verifyFace } from '../controllers/faceController.js'; 
+import { registerFace, verifyFace } from '../controllers/FaceControl.js'; 
 
 const router = express.Router();
 
@@ -30,6 +30,20 @@ router.put('/updatecitizen', updateCitizen);
 router.post('/register-face', registerFace);
 router.post('/verify-face', verifyFace);
 
+// Session — check if logged in
+router.get('/session', (req, res) => {
+  if (req.session.voter && req.session.voter.isVerified) {
+    return res.json({ loggedIn: true, voter: req.session.voter });
+  }
+  return res.json({ loggedIn: false });
+});
 
+// Session — logout
+router.post('/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) return res.status(500).json({ error: 'Logout failed' });
+    res.json({ success: true });
+  });
+});
 
 export default router;
