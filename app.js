@@ -17,6 +17,18 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'voting_secret_key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: false,
+    httpOnly: true,
+    maxAge: 1000 * 60 * 5  // 5 minutes
+  }
+}));
+
+
 import fs from 'fs';
 
 app.get('/check-models', (req, res) => {
