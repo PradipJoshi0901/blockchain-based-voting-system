@@ -90,11 +90,10 @@
       border-radius: 6px;
     }
 
-    .status-pending  { color: #e67e22; background: #fef9f0; }
-    .status-success  { color: #27ae60; background: #f0faf4; }
-    .status-error    { color: #e74c3c; background: #fff5f5; }
+    .status-pending { color: #e67e22; background: #fef9f0; }
+    .status-success { color: #27ae60; background: #f0faf4; }
+    .status-error   { color: #e74c3c; background: #fff5f5; }
 
-    /* Welcome overlay */
     #welcomeOverlay {
       display: none;
       position: fixed;
@@ -121,11 +120,7 @@
       to   { transform: scale(1);   opacity: 1; }
     }
 
-    .welcome-icon {
-      font-size: 50px;
-      margin-bottom: 15px;
-    }
-
+    .welcome-icon { font-size: 50px; margin-bottom: 15px; }
     .welcome-box h2 { color: #27ae60; margin: 0 0 8px; font-size: 24px; }
     .welcome-box p  { color: #555; font-size: 14px; margin: 0 0 20px; }
 
@@ -141,7 +136,6 @@
     }
 
     .btn-vote:hover { background: #1e40af; }
-
     .footer-text { margin-top: 15px; font-size: 11px; color: #888; }
 
     .steps {
@@ -175,15 +169,9 @@
 
     .step.active .step-circle { background: #2563eb; color: #fff; }
     .step.done   .step-circle { background: #27ae60; color: #fff; }
-    .step.active span         { color: #2563eb; font-weight: 600; }
-    .step.done   span         { color: #27ae60; }
-
-    .step-line {
-      width: 30px;
-      height: 2px;
-      background: #eee;
-      margin-top: 14px;
-    }
+    .step.active span { color: #2563eb; font-weight: 600; }
+    .step.done   span { color: #27ae60; }
+    .step-line { width: 30px; height: 2px; background: #eee; margin-top: 14px; }
   </style>
 </head>
 <body>
@@ -196,7 +184,7 @@
   <h2>Voter Login</h2>
   <p class="subtitle">Verify your identity to access the voting page</p>
 
-  <!-- Steps indicator -->
+  <!-- Steps -->
   <div class="steps">
     <div class="step active" id="step1">
       <div class="step-circle">1</div>
@@ -214,20 +202,20 @@
     </div>
   </div>
 
-  <!-- Step 1: Enter citizenship number -->
+  <!-- Step 1 -->
   <div id="inputSection">
     <input type="text" id="citizenshipNo" placeholder="Enter Citizenship Number (e.g. CIT123456)">
-    <button class="btn btn-primary" onclick="startFaceScan()">
+    <button class="btn btn-primary" id="scanBtn" onclick="startFaceScan()">
       <i class="fas fa-camera"></i> Start Face Verification
     </button>
   </div>
 
-  <!-- Step 2: Camera -->
+  <!-- Camera -->
   <video id="video" autoplay muted playsinline></video>
 
   <div id="status"></div>
 
-  <button class="btn btn-secondary" onclick="location.href='vote.html'">
+  <button class="btn btn-secondary" onclick="location.href='Index.html'">
     <i class="fas fa-arrow-left"></i> Back to Home
   </button>
 
@@ -247,15 +235,26 @@
 </div>
 
 <script>
-  // Dynamically load face-api
+  // ── 1. Clear any existing session immediately when page loads ──
+  window.addEventListener('load', async () => {
+    try {
+      await fetch('/api/logout', { method: 'POST' });
+      console.log('✅ Previous session cleared');
+    } catch (err) {
+      console.error('Could not clear session:', err);
+    }
+  });
+
+  // ── 2. Load face-api dynamically ──
   const script = document.createElement('script');
   script.src = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js';
   script.onload  = () => console.log('✅ face-api loaded');
-  script.onerror = () => setStatus('❌ Failed to load face-api.js', 'error');
+  script.onerror = () => setStatus('❌ Failed to load face-api.js. Check internet.', 'error');
   document.head.appendChild(script);
 
-  let verifiedCitizenshipNo = null;
+  let verifiedName = null;
 
+  // ── 3. Helpers ──
   function setStatus(msg, type = '') {
     const el = document.getElementById('status');
     el.textContent = msg;
@@ -263,7 +262,7 @@
   }
 
   function setStep(active) {
-    ['step1','step2','step3'].forEach((id, i) => {
+    ['step1', 'step2', 'step3'].forEach((id, i) => {
       const el = document.getElementById(id);
       el.className = 'step';
       if (i + 1 < active)  el.classList.add('done');
@@ -271,6 +270,14 @@
     });
   }
 
+  function resetForm() {
+    setStep(1);
+    document.getElementById('inputSection').style.display = 'block';
+    document.getElementById('scanBtn').disabled = false;
+    document.getElementById('video').style.display = 'none';
+  }
+
+  // ── 4. Main face scan function ──
   async function startFaceScan() {
     const citizenshipNo = document.getElementById('citizenshipNo').value.trim();
 
@@ -280,49 +287,56 @@
     }
 
     if (typeof faceapi === 'undefined') {
-      setStatus('⏳ face-api.js still loading, please wait...', 'pending');
+      setStatus('⏳ face-api.js still loading, please wait and try again...', 'pending');
       return;
     }
 
+    // Move to step 2
     setStep(2);
     setStatus('⏳ Loading face models...', 'pending');
     document.getElementById('inputSection').style.display = 'none';
+    document.getElementById('scanBtn').disabled = true;
 
     try {
+      // Load models
       await faceapi.nets.tinyFaceDetector.loadFromUri('./models');
       await faceapi.nets.faceLandmark68Net.loadFromUri('./models');
       await faceapi.nets.faceRecognitionNet.loadFromUri('./models');
 
       setStatus('📷 Opening camera...', 'pending');
 
+      // Open camera
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       const video  = document.getElementById('video');
       video.srcObject = stream;
       video.style.display = 'block';
       await video.play();
 
+      // Wait for camera to stabilize
       await new Promise(r => setTimeout(r, 3000));
-      setStatus('🔍 Scanning face...', 'pending');
+      setStatus('🔍 Scanning your face...', 'pending');
 
+      // Detect face
       const detection = await faceapi
         .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
         .withFaceLandmarks()
         .withFaceDescriptor();
 
+      // Stop camera
       stream.getTracks().forEach(t => t.stop());
       video.style.display = 'none';
 
       if (!detection) {
-        setStatus('❌ No face detected. Please try again.', 'error');
+        setStatus('❌ No face detected. Make sure your face is visible and try again.', 'error');
         resetForm();
         return;
       }
 
-      setStatus('✅ Face detected! Verifying...', 'pending');
+      setStatus('✅ Face detected! Verifying identity...', 'pending');
 
       const descriptor = Array.from(detection.descriptor);
 
-      // Send to backend for verification
+      // Send to backend — backend saves session on success
       const res  = await fetch('/api/verify-face', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -337,11 +351,11 @@
         return;
       }
 
-      // ✅ Verified!
-      verifiedCitizenshipNo = citizenshipNo;
+      // ✅ Verified — show welcome
+      verifiedName = data.name;
       setStep(3);
-      setStatus('✅ Verified successfully!', 'success');
-      showWelcome(citizenshipNo);
+      setStatus('✅ Identity verified successfully!', 'success');
+      showWelcome(data.name);
 
     } catch (err) {
       console.error(err);
@@ -350,22 +364,18 @@
     }
   }
 
-  function showWelcome(citizenshipNo) {
+  // ── 5. Show welcome popup ──
+  function showWelcome(name) {
     document.getElementById('welcomeMsg').innerHTML =
-      `Identity verified for <strong>${citizenshipNo}</strong>.<br>You may now cast your vote.`;
+      `Welcome, <strong>${name}</strong>!<br>
+       Your identity has been verified.<br>
+       You may now cast your vote.`;
     document.getElementById('welcomeOverlay').classList.add('show');
   }
 
+  // ── 6. Go to vote page — session already saved on backend ──
   function goToVote() {
-    // Pass citizenship number to vote page via sessionStorage
-    sessionStorage.setItem('verifiedVoter', verifiedCitizenshipNo);
     window.location.href = 'vote.html';
-  }
-
-  function resetForm() {
-    setStep(1);
-    document.getElementById('inputSection').style.display = 'block';
-    document.getElementById('video').style.display = 'none';
   }
 </script>
 
