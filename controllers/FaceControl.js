@@ -62,10 +62,25 @@ export const verifyFace = async (req, res) => {
     if (distance > 0.55) {
       return res.status(401).json({ error: "Face does not match" });
     }
+ req.session.voter = {
+      citizenshipNo,
+      voter_id:   rows[0].voter_id,
+      firstName:  rows[0].First_name,
+      lastName:   rows[0].Last_name,
+      has_voted:  rows[0].has_voted,
+      isVerified: true
+    };
 
-    return res.json({ success: true, message: "Face verified successfully" });
+    return res.json({
+      success:  true,
+      message:  "Face verified successfully",
+      name:     `${rows[0].First_name} ${rows[0].Last_name}`
+    });
+
   } catch (err) {
     console.error("Error verifying face:", err);
     res.status(500).json({ error: "Internal server error" });
   }
+
 };
+
