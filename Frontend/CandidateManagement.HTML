@@ -23,16 +23,8 @@
     align-items: center;
   }
 
-  .header h2 {
-    margin: 0;
-    color: #2c3e50;
-  }
-
-  .header p {
-    margin-top: 6px;
-    color: #7f8c8d;
-    font-size: 14px;
-  }
+  .header h2 { margin: 0; color: #2c3e50; }
+  .header p { margin-top: 6px; color: #7f8c8d; font-size: 14px; }
 
   .card-container {
     display: flex;
@@ -50,23 +42,12 @@
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
 
-  .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 25px rgba(0,0,0,0.12);
-  }
+  .card:hover { transform: translateY(-5px); box-shadow: 0 12px 25px rgba(0,0,0,0.12); }
+  .card h3 { margin: 5px 0; color: #2c3e50; }
+  .card p { font-size: 13px; color: #777; }
 
-  .card h3 {
-    margin: 5px 0;
-    color: #2c3e50;
-  }
-
-  .card p {
-    font-size: 13px;
-    color: #777;
-  }
-
-  .add { border-left: 5px solid #27ae60; }
-  .list { border-left: 5px solid #2980b9; }
+  .add    { border-left: 5px solid #27ae60; }
+  .list   { border-left: 5px solid #2980b9; }
   .remove { border-left: 5px solid #e74c3c; }
 
   .section {
@@ -79,13 +60,41 @@
     margin-bottom: 30px;
   }
 
+  .field-group {
+    position: relative;
+    margin-bottom: 6px;
+  }
+
   input, select {
     width: 100%;
     padding: 10px;
-    margin-bottom: 12px;
     border-radius: 6px;
     border: 1px solid #ccc;
     font-size: 14px;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+  }
+
+  input:focus, select:focus {
+    outline: none;
+    border-color: #2980b9;
+  }
+
+  input.invalid, select.invalid {
+    border-color: #e74c3c;
+    background: #fff8f8;
+  }
+
+  input.valid, select.valid {
+    border-color: #27ae60;
+  }
+
+  .field-error {
+    font-size: 12px;
+    color: #e74c3c;
+    margin: 2px 0 8px 2px;
+    min-height: 16px;
+    display: block;
   }
 
   .section-btn {
@@ -97,26 +106,28 @@
     font-weight: bold;
     cursor: pointer;
     color: white;
+    margin-top: 6px;
+    transition: opacity 0.2s;
   }
 
-  .save { background: #27ae60; }
+  .section-btn:hover { opacity: 0.88; }
+  .save   { background: #27ae60; }
   .delete { background: #e74c3c; }
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 10px; border: 1px solid #ddd; text-align: center; }
+  th { background: #f1f3f6; font-weight: 600; }
+
+  .form-alert {
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-bottom: 14px;
+    display: none;
   }
 
-  th, td {
-    padding: 10px;
-    border: 1px solid #ddd;
-    text-align: center;
-  }
-
-  th {
-    background: #f1f3f6;
-    font-weight: 600;
-  }
+  .form-alert.error   { background: #fdecea; color: #c0392b; border: 1px solid #f5c6cb; }
+  .form-alert.success { background: #eafaf1; color: #1e8449;  border: 1px solid #a9dfbf; }
 </style>
 </head>
 
@@ -134,33 +145,59 @@
     <h3>Add Candidate</h3>
     <p>Register a new election candidate</p>
   </div>
-
   <div class="card list" onclick="showSection('listSection'); listCandidates()">
     <h3>List Candidates</h3>
     <p>View all registered candidates</p>
   </div>
-
   <div class="card remove" onclick="showSection('removeSection')">
     <h3>Remove Candidate</h3>
     <p>Delete a candidate from the system</p>
   </div>
 </div>
 
+<!-- ADD SECTION -->
 <div class="section" id="addSection">
-  <input type="text" id="addCitizenship" placeholder="Citizenship Number">
-  <input type="text" id="addNID" placeholder="NID Number">
-  <input type="text" id="addName" placeholder="Candidate Name">
-  <input type="number" id="addAge" placeholder="Age">
-  <select id="addGender">
-    <option value="">Select Gender</option>
-    <option>Male</option>
-    <option>Female</option>
-    <option>Other</option>
-  </select>
-  <input type="text" id="addParty" placeholder="Party Name">
+  <div id="addAlert" class="form-alert"></div>
+
+  <div class="field-group">
+    <input type="text" id="addCitizenship" placeholder="Citizenship Number *" oninput="validateField(this, validateCitizenship)" onblur="validateField(this, validateCitizenship)">
+    <span class="field-error" id="addCitizenshipError"></span>
+  </div>
+
+  <div class="field-group">
+    <input type="text" id="addNID" placeholder="NID Number *" oninput="validateField(this, validateNID)" onblur="validateField(this, validateNID)">
+    <span class="field-error" id="addNIDError"></span>
+  </div>
+
+  <div class="field-group">
+    <input type="text" id="addName" placeholder="Candidate Name *" oninput="validateField(this, validateName)" onblur="validateField(this, validateName)">
+    <span class="field-error" id="addNameError"></span>
+  </div>
+
+  <div class="field-group">
+    <input type="number" id="addAge" placeholder="Age *" oninput="validateField(this, validateAge)" onblur="validateField(this, validateAge)">
+    <span class="field-error" id="addAgeError"></span>
+  </div>
+
+  <div class="field-group">
+    <select id="addGender" onchange="validateField(this, validateGender)" onblur="validateField(this, validateGender)">
+      <option value="">Select Gender *</option>
+      <option>Male</option>
+      <option>Female</option>
+      <option>Other</option>
+    </select>
+    <span class="field-error" id="addGenderError"></span>
+  </div>
+
+  <div class="field-group">
+    <input type="text" id="addParty" placeholder="Party Name *" oninput="validateField(this, validateParty)" onblur="validateField(this, validateParty)">
+    <span class="field-error" id="addPartyError"></span>
+  </div>
+
   <button class="section-btn save" onclick="addCandidate()">Save Candidate</button>
 </div>
 
+<!-- LIST SECTION -->
 <div class="section" id="listSection">
   <table>
     <thead>
@@ -177,65 +214,192 @@
   </table>
 </div>
 
+<!-- REMOVE SECTION -->
 <div class="section" id="removeSection">
-  <input type="text" id="removeCitizenship" placeholder="Citizenship Number">
+  <div id="removeAlert" class="form-alert"></div>
+
+  <div class="field-group">
+    <input type="text" id="removeCitizenship" placeholder="Citizenship Number *" oninput="validateField(this, validateCitizenship)" onblur="validateField(this, validateCitizenship)">
+    <span class="field-error" id="removeCitizenshipError"></span>
+  </div>
+
   <button class="section-btn delete" onclick="deleteCandidate()">Delete Candidate</button>
 </div>
 
 <script>
-function showSection(sectionId) {
-  document.getElementById('addSection').style.display = 'none';
-  document.getElementById('listSection').style.display = 'none';
-  document.getElementById('removeSection').style.display = 'none';
-  document.getElementById(sectionId).style.display = 'block';
+/* ─── Validation rules ─── */
+
+function validateCitizenship(val) {
+  val = val.trim();
+  if (!val) return "Citizenship number is required.";
+  if (!/^[\d\-]{5,20}$/.test(val)) return "Must be 5–20 characters (digits and hyphens only).";
+  return "";
 }
 
-// Add Candidate
-async function addCandidate() {
-  const data = {
-    citizenship_number: document.getElementById('addCitizenship').value,
-    NID_number: document.getElementById('addNID').value,
-    Candidate_Name: document.getElementById('addName').value,
-    Age: document.getElementById('addAge').value,
-    Gender: document.getElementById('addGender').value,
-    Party_Name: document.getElementById('addParty').value
-  };
+function validateNID(val) {
+  val = val.trim();
+  if (!val) return "NID number is required.";
+  if (!/^[\d\-]{8,20}$/.test(val)) return "Must be 8–20 characters (digits and hyphens only).";
+  return "";
+}
 
-  if (!data.Candidate_Name) {
-    alert("Candidate name is required");
+function validateName(val) {
+  val = val.trim();
+  if (!val) return "Candidate name is required.";
+  if (val.length < 2) return "Name must be at least 2 characters.";
+  if (val.length > 80) return "Name cannot exceed 80 characters.";
+  if (!/^[a-zA-Z\s]+$/.test(val)) return "Name can only contain letters and spaces.";
+  return "";
+}
+
+function validateAge(val) {
+  const age = Number(val);
+  if (val === "" || val === null) return "Age is required.";
+  if (!Number.isInteger(age) || isNaN(age)) return "Age must be a whole number.";
+  if (age < 25) return "Candidate must be at least 25 years old.";
+  if (age > 100) return "Please enter a valid age (max 100).";
+  return "";
+}
+
+function validateGender(val) {
+  if (!val) return "Please select a gender.";
+  return "";
+}
+
+function validateParty(val) {
+  val = val.trim();
+  if (!val) return "Party name is required.";
+  if (val.length < 2) return "Party name must be at least 2 characters.";
+  if (val.length > 80) return "Party name cannot exceed 80 characters.";
+  if (!/^[a-zA-Z\s]+$/.test(val)) return "Party name can only contain letters and spaces.";
+  return "";
+}
+
+/* ─── Field-level validation helper ─── */
+
+function validateField(input, ruleFn) {
+  const errorId = input.id + "Error";
+  const errorEl = document.getElementById(errorId);
+  const msg = ruleFn(input.value);
+
+  input.classList.toggle("invalid", !!msg);
+  input.classList.toggle("valid",   !msg && input.value.trim() !== "");
+
+  if (errorEl) errorEl.textContent = msg;
+  return !msg;
+}
+
+/* ─── Full-form validation for Add ─── */
+
+function validateAddForm() {
+  const fields = [
+    { id: "addCitizenship", fn: validateCitizenship },
+    { id: "addNID",         fn: validateNID         },
+    { id: "addName",        fn: validateName        },
+    { id: "addAge",         fn: validateAge         },
+    { id: "addGender",      fn: validateGender      },
+    { id: "addParty",       fn: validateParty       },
+  ];
+
+  let allValid = true;
+  for (const { id, fn } of fields) {
+    const el = document.getElementById(id);
+    if (!validateField(el, fn)) allValid = false;
+  }
+  return allValid;
+}
+
+/* ─── Alert helpers ─── */
+
+function showAlert(id, msg, type) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.className = "form-alert " + type;
+  el.style.display = "block";
+  if (type === "success") setTimeout(() => { el.style.display = "none"; }, 4000);
+}
+
+function hideAlert(id) {
+  const el = document.getElementById(id);
+  el.style.display = "none";
+}
+
+/* ─── Section toggle ─── */
+
+function showSection(sectionId) {
+  ["addSection", "listSection", "removeSection"].forEach(id => {
+    document.getElementById(id).style.display = "none";
+  });
+  document.getElementById(sectionId).style.display = "block";
+}
+
+/* ─── Add Candidate ─── */
+
+async function addCandidate() {
+  hideAlert("addAlert");
+  if (!validateAddForm()) {
+    showAlert("addAlert", "Please fix the errors above before submitting.", "error");
     return;
   }
 
+  const data = {
+    citizenship_number: document.getElementById("addCitizenship").value.trim(),
+    NID_number:         document.getElementById("addNID").value.trim(),
+    Candidate_Name:     document.getElementById("addName").value.trim(),
+    Age:                document.getElementById("addAge").value,
+    Gender:             document.getElementById("addGender").value,
+    Party_Name:         document.getElementById("addParty").value.trim()
+  };
+
   try {
-    const response = await fetch('/api/registercandidate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const response = await fetch("/api/registercandidate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
     });
 
     if (!response.ok) {
       const err = await response.json();
-      throw new Error(err.error || 'Error registering candidate');
+      throw new Error(err.error || "Error registering candidate");
     }
 
     const result = await response.json();
-    alert(result.message);
-    listCandidates(); // Refresh list
+    showAlert("addAlert", result.message || "Candidate registered successfully.", "success");
+    resetAddForm();
+    listCandidates();
   } catch (error) {
-    alert("Error adding candidate: " + error.message);
+    showAlert("addAlert", "Error adding candidate: " + error.message, "error");
   }
 }
 
-// List Candidates
+function resetAddForm() {
+  ["addCitizenship","addNID","addName","addAge","addParty"].forEach(id => {
+    const el = document.getElementById(id);
+    el.value = "";
+    el.classList.remove("valid","invalid");
+  });
+  const gender = document.getElementById("addGender");
+  gender.value = "";
+  gender.classList.remove("valid","invalid");
+  document.querySelectorAll("#addSection .field-error").forEach(el => el.textContent = "");
+}
+
+/* ─── List Candidates ─── */
+
 async function listCandidates() {
   try {
-    const response = await fetch('/api/listcandidates');
+    const response = await fetch("/api/listcandidates");
     const candidates = await response.json();
-    const tbody = document.getElementById('candidateList');
-    tbody.innerHTML = '';
+    const tbody = document.getElementById("candidateList");
+    tbody.innerHTML = "";
+
+    if (!candidates.length) {
+      tbody.innerHTML = "<tr><td colspan='6' style='color:#888;'>No candidates registered yet.</td></tr>";
+      return;
+    }
 
     candidates.forEach(c => {
-      const tr = document.createElement('tr');
+      const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${c.citizenship_number}</td>
         <td>${c.NID_number}</td>
@@ -251,28 +415,38 @@ async function listCandidates() {
   }
 }
 
-// Delete Candidate
+/* ─── Delete Candidate ─── */
+
 async function deleteCandidate() {
-  const citizenship_number = document.getElementById('removeCitizenship').value;
-  if (!citizenship_number) { alert("Enter citizenship number"); return; }
+  hideAlert("removeAlert");
+  const input = document.getElementById("removeCitizenship");
+  if (!validateField(input, validateCitizenship)) {
+    showAlert("removeAlert", "Please enter a valid citizenship number.", "error");
+    return;
+  }
+
+  const citizenship_number = input.value.trim();
 
   try {
-    const response = await fetch('/api/removecandidate', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
+    const response = await fetch("/api/removecandidate", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ citizenship_number })
     });
 
     if (!response.ok) {
       const err = await response.json();
-      throw new Error(err.error || 'Error removing candidate');
+      throw new Error(err.error || "Error removing candidate");
     }
 
     const result = await response.json();
-    alert(result.message);
+    showAlert("removeAlert", result.message || "Candidate removed successfully.", "success");
+    input.value = "";
+    input.classList.remove("valid","invalid");
+    document.getElementById("removeCitizenshipError").textContent = "";
     listCandidates();
   } catch (error) {
-    alert("Error removing candidate: " + error.message);
+    showAlert("removeAlert", "Error removing candidate: " + error.message, "error");
   }
 }
 </script>
