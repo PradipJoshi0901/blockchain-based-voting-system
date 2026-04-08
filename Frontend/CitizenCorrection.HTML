@@ -136,7 +136,7 @@ body {
 .section-title { font-size: 13px; font-weight: 600; color: var(--text); }
 .section-desc  { font-size: 11px; color: var(--text-muted); margin-left: auto; font-family: var(--mono); }
 
-.field { margin-bottom: 14px; }
+.field { margin-bottom: 4px; }
 
 .field label {
   display: block;
@@ -171,6 +171,25 @@ input:focus {
 
 input[type="date"] { font-family: var(--mono); font-size: 12px; }
 input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.4; cursor: pointer; }
+
+input.invalid {
+  border-color: var(--error) !important;
+  background: var(--error-bg) !important;
+  box-shadow: none !important;
+}
+
+input.valid {
+  border-color: var(--success) !important;
+}
+
+.field-error {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--error);
+  margin: 3px 2px 10px;
+  min-height: 14px;
+  display: block;
+}
 
 .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
@@ -258,6 +277,7 @@ input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.4; cursor: po
 
   <div class="portal-body">
 
+    <!-- SECTION 01: Search -->
     <div class="section">
       <div class="section-label">
         <div class="section-num">01</div>
@@ -267,16 +287,24 @@ input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.4; cursor: po
       <div class="row">
         <div class="field">
           <label>Citizenship No.</label>
-          <input type="text" id="searchCitizenship" placeholder="e.g. 12-34-56789">
+          <input type="text" id="searchCitizenship" placeholder="e.g. 12-34-56789"
+            oninput="validateField(this, validateCitizenshipNo)"
+            onblur="validateField(this, validateCitizenshipNo)">
+          <span class="field-error" id="searchCitizenshipError"></span>
         </div>
         <div class="field">
           <label>NID Number</label>
-          <input type="text" id="searchNID" placeholder="e.g. NID-00001">
+          <input type="text" id="searchNID" placeholder="e.g. 12-34-56789"
+            oninput="validateField(this, validateNIDNo)"
+            onblur="validateField(this, validateNIDNo)">
+          <span class="field-error" id="searchNIDError"></span>
+
         </div>
       </div>
       <button class="btn btn-search" onclick="searchCitizen()">Search Citizen</button>
     </div>
 
+    <!-- SECTION 02: Edit -->
     <div class="section">
       <div class="section-label">
         <div class="section-num">02</div>
@@ -286,31 +314,43 @@ input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.4; cursor: po
       <div class="row">
         <div class="field">
           <label>First Name</label>
-          <input type="text" id="First_Name" placeholder="First name">
+          <input type="text" id="First_Name" placeholder="First name"
+            oninput="validateField(this, validateName)"
+            onblur="validateField(this, validateName)">
+          <span class="field-error" id="First_NameError"></span>
         </div>
         <div class="field">
           <label>Last Name</label>
-          <input type="text" id="Last_Name" placeholder="Last name">
+          <input type="text" id="Last_Name" placeholder="Last name"
+            oninput="validateField(this, validateName)"
+            onblur="validateField(this, validateName)">
+          <span class="field-error" id="Last_NameError"></span>
         </div>
       </div>
       <div class="row">
         <div class="field">
           <label>Date of Birth</label>
-          <input type="date" id="date_of_birth">
+          <input type="date" id="date_of_birth"
+            onchange="validateField(this, validateDOB)"
+            onblur="validateField(this, validateDOB)">
+          <span class="field-error" id="date_of_birthError"></span>
         </div>
         <div class="field">
           <label>Gender</label>
-          <input type="text" id="Gender" placeholder="Gender">
+          <input type="text" id="Gender" placeholder="Male / Female / Other"
+            oninput="validateField(this, validateGender)"
+            onblur="validateField(this, validateGender)">
+          <span class="field-error" id="GenderError"></span>
         </div>
       </div>
       <div class="field">
         <label>Full Address</label>
-        <input type="text" id="address" placeholder="Street, City, Province">
+        <input type="text" id="address" placeholder="Street, City, Province"
+          oninput="validateField(this, validateAddress)"
+          onblur="validateField(this, validateAddress)">
+        <span class="field-error" id="addressError"></span>
       </div>
-      <div class="field">
-        <label>NID Number</label>
-        <input type="text" id="NID_number" placeholder="NID number">
-      </div>
+
       <div class="divider"></div>
       <button class="btn btn-update" onclick="updateCitizen()">Update Citizen Information</button>
       <div id="message"></div>
@@ -329,6 +369,129 @@ input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.4; cursor: po
 </div>
 
 <script>
+/* ─── Validation rules ─── */
+
+/*
+  Citizenship No.
+  - Required
+  - 5–20 characters
+  - Digits and hyphens (-) only
+  - Example: 12-34-56789
+*/
+function validateCitizenshipNo(val) {
+  val = val.trim();
+  if (!val) return "Citizenship number is required.";
+  if (val.length < 5 || val.length > 20) return "Must be 5–20 characters long.";
+  if (!/^[\d-]+$/.test(val)) return "Only digits and hyphens (-) allowed.";
+  return "";
+}
+
+/*
+  NID Number
+  - Required
+  - 5–20 characters
+  - Digits and hyphens (-) only
+  - Example: 12345-00001
+*/
+function validateNIDNo(val) {
+  val = val.trim();
+  if (!val) return "NID number is required.";
+  if (val.length < 5 || val.length > 20) return "Must be 5–20 characters long.";
+  if (!/^[\d-]+$/.test(val)) return "Only digits and hyphens (-) allowed.";
+  return "";
+}
+
+/*
+  Name (First & Last — same rule)
+  - Required
+  - 2–80 characters
+  - Letters and spaces only
+  - No hyphens, apostrophes, periods, or special characters
+*/
+function validateName(val) {
+  val = val.trim();
+  if (!val) return "This field is required.";
+  if (val.length < 2)  return "Must be at least 2 characters.";
+  if (val.length > 80) return "Cannot exceed 80 characters.";
+  if (!/^[a-zA-Z\s]+$/.test(val)) return "Only letters and spaces allowed. No hyphens, apostrophes, or periods.";
+  return "";
+}
+
+/*
+  Date of Birth
+  - Required
+  - Must be a valid past date
+  - Age must be realistic (≤ 150 years)
+*/
+function validateDOB(val) {
+  if (!val) return "Date of birth is required.";
+  const dob   = new Date(val);
+  const today = new Date();
+  if (isNaN(dob.getTime())) return "Enter a valid date.";
+  if (dob >= today) return "Date of birth must be in the past.";
+  const age = Math.floor((today - dob) / (365.25 * 24 * 60 * 60 * 1000));
+  if (age > 150) return "Enter a realistic date of birth.";
+  return "";
+}
+
+/*
+  Gender
+  - Required
+  - Must be Male, Female, or Other (case-insensitive)
+*/
+function validateGender(val) {
+  val = val.trim();
+  if (!val) return "Gender is required.";
+  if (!["male", "female", "other"].includes(val.toLowerCase())) return "Enter Male, Female, or Other.";
+  return "";
+}
+
+/*
+  Address
+  - Required
+  - 5–200 characters
+*/
+function validateAddress(val) {
+  val = val.trim();
+  if (!val) return "Address is required.";
+  if (val.length < 5)   return "Address is too short (min 5 characters).";
+  if (val.length > 200) return "Address is too long (max 200 characters).";
+  return "";
+}
+
+/* ─── Field-level helper ─── */
+
+function validateField(input, ruleFn) {
+  const errorId = input.id + "Error";
+  const errorEl = document.getElementById(errorId);
+  const msg = ruleFn(input.value);
+
+  input.classList.toggle("invalid", !!msg);
+  input.classList.toggle("valid",   !msg && input.value.trim() !== "");
+
+  if (errorEl) errorEl.textContent = msg;
+  return !msg;
+}
+
+/* ─── Full-form validation for Update ─── */
+
+function validateUpdateForm() {
+  const fields = [
+    { id: "First_Name",    fn: validateName    },
+    { id: "Last_Name",     fn: validateName    },
+    { id: "date_of_birth", fn: validateDOB     },
+    { id: "Gender",        fn: validateGender  },
+    { id: "address",       fn: validateAddress },
+  ];
+  let allValid = true;
+  for (const { id, fn } of fields) {
+    if (!validateField(document.getElementById(id), fn)) allValid = false;
+  }
+  return allValid;
+}
+
+/* ─── Message helper ─── */
+
 function showMessage(text, type = 'info') {
   const el = document.getElementById('message');
   el.textContent = text;
@@ -336,69 +499,103 @@ function showMessage(text, type = 'info') {
   el.style.animation = 'none';
   el.offsetHeight;
   el.style.animation = '';
+  if (type === 'success') setTimeout(() => { el.style.display = 'none'; }, 4000);
 }
+
+/* ─── Search ─── */
 
 async function searchCitizen() {
-  const citizenship_number = document.getElementById('searchCitizenship').value;
-  const NID_number = document.getElementById('searchNID').value;
+  const citizenshipInput = document.getElementById('searchCitizenship');
+  const nidInput         = document.getElementById('searchNID');
 
-  const response = await fetch(
-    `/api/citizen?citizenship_number=${encodeURIComponent(citizenship_number)}&NID_number=${encodeURIComponent(NID_number)}`,
-    { method: 'GET' }
-  );
+  const v1 = validateField(citizenshipInput, validateCitizenshipNo);
+  const v2 = validateField(nidInput, validateNIDNo);
+  if (!v1 || !v2) return;
 
-  const result = await response.json();
+  try {
+    const citizenship_number = citizenshipInput.value.trim();
+    const NID_number         = nidInput.value.trim();
 
-  if (!response.ok) {
-    showMessage(result.error || 'Citizen not found', 'error');
-    return;
+    const response = await fetch(
+      `/api/citizen?citizenship_number=${encodeURIComponent(citizenship_number)}&NID_number=${encodeURIComponent(NID_number)}`,
+      { method: 'GET' }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      showMessage(result.error || 'Citizen not found', 'error');
+      return;
+    }
+
+    const dob = result.date_of_birth ? result.date_of_birth.substring(0, 10) : '';
+
+    const fieldMap = {
+      First_Name:    result.First_Name    || '',
+      Last_Name:     result.Last_Name     || '',
+      date_of_birth: dob,
+      Gender:        result.Gender        || '',
+      address:       result.address       || '',
+    };
+
+    for (const [id, val] of Object.entries(fieldMap)) {
+      const el = document.getElementById(id);
+      el.value = val;
+      el.classList.remove('invalid', 'valid');
+      const errEl = document.getElementById(id + 'Error');
+      if (errEl) errEl.textContent = '';
+    }
+
+    citizenshipInput.dataset.originalCitizenship = result.citizenship_number || citizenship_number;
+    nidInput.dataset.originalNID                 = result.NID_number          || NID_number;
+
+    showMessage('Citizen data loaded. You can edit and update.', 'info');
+  } catch (err) {
+    showMessage('Search failed: ' + err.message, 'error');
   }
-
-  const dob = result.date_of_birth ? result.date_of_birth.substring(0, 10) : '';
-
-  document.getElementById('First_Name').value    = result.First_Name || '';
-  document.getElementById('Last_Name').value     = result.Last_Name || '';
-  document.getElementById('date_of_birth').value = dob;
-  document.getElementById('Gender').value        = result.Gender || '';
-  document.getElementById('address').value       = result.address || '';
-  document.getElementById('NID_number').value    = result.NID_number || '';
-
-  document.getElementById('searchCitizenship').dataset.originalCitizenship = result.citizenship_number || citizenship_number;
-  document.getElementById('searchNID').dataset.originalNID = result.NID_number || NID_number;
-
-  showMessage('Citizen data loaded. You can edit and update.', 'info');
 }
+
+/* ─── Update ─── */
 
 async function updateCitizen() {
   const searchCitizenshipInput = document.getElementById('searchCitizenship');
-  const searchNIDInput = document.getElementById('searchNID');
+  const searchNIDInput         = document.getElementById('searchNID');
 
   const citizenshipNum = searchCitizenshipInput.dataset.originalCitizenship || searchCitizenshipInput.value.trim();
-  const nidNum = searchNIDInput.dataset.originalNID || searchNIDInput.value.trim();
+  const nidNum         = searchNIDInput.dataset.originalNID                 || searchNIDInput.value.trim();
 
   if (!citizenshipNum || !nidNum) {
     showMessage('Please search for a citizen first before updating.', 'error');
     return;
   }
 
-  const data = {
-    citizenship_number: citizenshipNum,
-    NID_number: nidNum,
-    First_Name: document.getElementById('First_Name').value,
-    Last_Name: document.getElementById('Last_Name').value,
-    date_of_birth: document.getElementById('date_of_birth').value,
-    Gender: document.getElementById('Gender').value,
-    address: document.getElementById('address').value
-  };
+  if (!validateUpdateForm()) {
+    showMessage('Please fix the errors above before updating.', 'error');
+    return;
+  }
 
-  const response = await fetch('/api/updatecitizen', {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  });
+  try {
+    const data = {
+      citizenship_number: citizenshipNum,
+      NID_number:         nidNum,
+      First_Name:         document.getElementById('First_Name').value.trim(),
+      Last_Name:          document.getElementById('Last_Name').value.trim(),
+      date_of_birth:      document.getElementById('date_of_birth').value,
+      Gender:             document.getElementById('Gender').value.trim(),
+      address:            document.getElementById('address').value.trim()
+    };
 
-  const result = await response.json();
-  showMessage(result.message || result.error, response.ok ? 'success' : 'error');
+    const response = await fetch('/api/updatecitizen', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+    showMessage(result.message || result.error, response.ok ? 'success' : 'error');
+  } catch (err) {
+    showMessage('Update failed: ' + err.message, 'error');
+  }
 }
 </script>
 </body>
